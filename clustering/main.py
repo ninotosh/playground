@@ -14,7 +14,7 @@ vector = vectorizer.fit_transform(documents)
 print("documents: %d, unique words: %d" % vector.shape)
 # documents: 4, unique words: 9
 
-kmeans = MiniBatchKMeans(n_clusters=n_clusters, verbose=True)
+kmeans = MiniBatchKMeans(n_clusters=n_clusters, verbose=False)
 kmeans.fit(vector)
 
 for cluster_idx, document in zip(kmeans.labels_, documents):
