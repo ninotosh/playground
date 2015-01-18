@@ -1,4 +1,4 @@
-This is a demo python script of incremental document clustering.
+[unsupervised_doc_clustering.py](unsupervised_doc_clustering.py) is a demo python script of incremental document clustering.
 
 First install scikit-learn
 
