@@ -1,4 +1,6 @@
 `simple_perceptron.py` demonstrates an N input simple perceptron.
+It was implemented with reference to
+http://natureofcode.com/book/chapter-10-neural-networks/
 
 ```shell
 $ python simple_perceptron.py
@@ -35,3 +37,10 @@ error rate: 56 / 1000 => 5.600%
 `run_2d` receives 2 dimensional data and outputs a scalar.
 
 The example above shows error rates using randomized data sets.
+
+----
+
+`two_layer_perceptron_network.py` demonstrates a neural network with 1 hidden layer using `SimplePerceptron` class in `simple_perceptron.py`.
+It may be redundant in that every perceptron has its own learning rate and activation function.
+Biases are not trained as the implementation is based on and tested against
+http://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
