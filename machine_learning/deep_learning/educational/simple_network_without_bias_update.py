@@ -44,7 +44,7 @@ class Layer:
         return [perceptron.output(inputs) for perceptron in self.perceptrons]
 
 
-class TwoLayerPerceptronNetwork:
+class SimpleNetworkWithoutBiasUpdate:
     def __init__(self, hidden_layer: Layer, output_layer: Layer, calc_error=squared_error):
         self.hidden_layer = hidden_layer
         self.output_layer = output_layer
