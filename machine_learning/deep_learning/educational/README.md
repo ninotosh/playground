@@ -32,9 +32,9 @@ error rate: 56 / 1000 => 5.600%
 
 `run_1d` classifies 1 dimensional data.
 
-`run_and` and `run_or` simulates the logical AND / OR operations.
+`run_and` and `run_or` simulate the logical AND / OR operations.
 
-`run_2d` receives 2 dimensional data and outputs a scalar.
+`run_2d` receives 2 dimensional data and outputs a scalar to classify inputs into 2 groups.
 
 The example above shows error rates using randomized data sets.
 
@@ -44,3 +44,13 @@ The example above shows error rates using randomized data sets.
 It may be redundant in that every perceptron has its own learning rate and activation function.
 Code to update biases are commented out because the implementation is based on and tested against
 http://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
+
+Its `main()` to simulate the logical XOR prints out inputs and outputs after training.
+It gives much better results with the code of bias updates.
+
+```
+[0, 0] => [0.02861174808948324], target: [0]
+[0, 1] => [0.973944082535187], target: [1]
+[1, 0] => [0.9746497850023864], target: [1]
+[1, 1] => [0.02716130421163732], target: [0]
+```

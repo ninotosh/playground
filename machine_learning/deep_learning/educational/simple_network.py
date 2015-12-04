@@ -85,3 +85,36 @@ class SimpleNetwork:
 
             # uncomment to update the biases
             # hl_perceptron.bias -= hl_perceptron.learning_rate * hl_delta
+
+
+if __name__ == "__main__":
+    from random import uniform, randrange
+
+    def run_xor():
+        """
+        Simulates XOR.
+        It is better to uncomment the code of updating the biases.
+        """
+        learning_rate = 1
+
+        hidden_layer = Layer([
+            SimplePerceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
+            SimplePerceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
+        ])
+
+        output_layer = Layer([
+            SimplePerceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
+        ])
+
+        network = SimpleNetwork(hidden_layer, output_layer)
+
+        input_samples = [[0, 0], [0, 1], [1, 0], [1, 1]]
+        targets = [[0], [1], [1], [0]]
+        for _ in range(10000):
+            i = randrange(0, len(input_samples))
+            network.train(input_samples[i], targets[i])
+
+        for i in range(len(input_samples)):
+            print('{} => {}, target: {}'.format(input_samples[i], network.output(input_samples[i]), targets[i]))
+
+    run_xor()
