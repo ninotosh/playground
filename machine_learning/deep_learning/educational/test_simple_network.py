@@ -1,10 +1,10 @@
 import unittest
 
 from educational.simple_perceptron import SimplePerceptron
-from educational.simple_network_without_bias_update import Layer, sigmoid, SimpleNetworkWithoutBiasUpdate, squared_errors
+from educational.simple_network import Layer, sigmoid, SimpleNetwork, squared_errors
 
 
-class TestSimpleNetworkWithoutBiasUpdate(unittest.TestCase):
+class TestSimpleNetwork(unittest.TestCase):
     def test(self):
         learning_rate = 0.5
 
@@ -18,7 +18,7 @@ class TestSimpleNetworkWithoutBiasUpdate(unittest.TestCase):
             SimplePerceptron(learning_rate, [0.5, 0.55], 0.6, activate=sigmoid)
         ])
 
-        network = SimpleNetworkWithoutBiasUpdate(hidden_layer, output_layer)
+        network = SimpleNetwork(hidden_layer, output_layer)
 
         inputs = [0.05, 0.1]
         targets = [0.01, 0.99]

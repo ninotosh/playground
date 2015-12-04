@@ -40,7 +40,7 @@ The example above shows error rates using randomized data sets.
 
 ----
 
-`simple_network_without_bias_update.py` demonstrates a neural network with 1 hidden layer using `SimplePerceptron` class in `simple_perceptron.py`.
+`simple_network.py` demonstrates a neural network with 1 hidden layer using `SimplePerceptron` class in `simple_perceptron.py`.
 It may be redundant in that every perceptron has its own learning rate and activation function.
-Biases are not trained as the implementation is based on and tested against
+Code to update biases are commented out because the implementation is based on and tested against
 http://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/

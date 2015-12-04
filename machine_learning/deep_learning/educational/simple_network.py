@@ -44,7 +44,7 @@ class Layer:
         return [perceptron.output(inputs) for perceptron in self.perceptrons]
 
 
-class SimpleNetworkWithoutBiasUpdate:
+class SimpleNetwork:
     def __init__(self, hidden_layer: Layer, output_layer: Layer, calc_error=squared_error):
         self.hidden_layer = hidden_layer
         self.output_layer = output_layer
@@ -71,6 +71,9 @@ class SimpleNetworkWithoutBiasUpdate:
                 perceptron.weights[j] -= perceptron.learning_rate * delta * hl_out
                 # print('h[{}] -> o[{}]: {}'.format(j, i, perceptron.weights[j]))
 
+            # uncomment to update the biases
+            # perceptron.bias -= perceptron.learning_rate * delta
+
         for j in range(len(total_gradient_to_hl)):
             hl_out = hl_outputs[j]
             hl_perceptron = self.hidden_layer.perceptrons[j]
@@ -79,3 +82,6 @@ class SimpleNetworkWithoutBiasUpdate:
             for k in range(len(inputs)):
                 hl_perceptron.weights[k] -= hl_perceptron.learning_rate * hl_delta * inputs[k]
                 # print('i[{}] -> h[{}]: {}'.format(k, j, hl_perceptron.weights[k]))
+
+            # uncomment to update the biases
+            # hl_perceptron.bias -= hl_perceptron.learning_rate * hl_delta
