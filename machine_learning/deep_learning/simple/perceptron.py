@@ -20,7 +20,7 @@ def subtract(target, output):
     return target - output
 
 
-class SimplePerceptron:
+class Perceptron:
     def __init__(self, learning_rate, weights, bias, activate=sign):
         """
         :type learning_rate: float
@@ -103,7 +103,7 @@ def run(
     assert 0 < learning_rate <= 1
     assert len(initial_weights) == len(training_input_list[0])
 
-    perceptron = SimplePerceptron(learning_rate, initial_weights, initial_bias)
+    perceptron = Perceptron(learning_rate, initial_weights, initial_bias)
 
     for i in range(len(training_input_list)):
         perceptron.train(

@@ -1,6 +1,6 @@
 import math
 
-from educational.simple_perceptron import SimplePerceptron
+from simple.perceptron import Perceptron
 
 
 def sigmoid(z):
@@ -37,14 +37,14 @@ def squared_errors(targets: [float], outputs: [float]) -> float:
 
 
 class Layer:
-    def __init__(self, perceptrons: [SimplePerceptron]):
+    def __init__(self, perceptrons: [Perceptron]):
         self.perceptrons = perceptrons
 
     def output(self, inputs: [float]) -> [float]:
         return [perceptron.output(inputs) for perceptron in self.perceptrons]
 
 
-class SimpleNetwork:
+class NetworkWith1HiddenLayer:
     def __init__(self, hidden_layer: Layer, output_layer: Layer, calc_error=squared_error):
         self.hidden_layer = hidden_layer
         self.output_layer = output_layer
@@ -98,15 +98,15 @@ if __name__ == "__main__":
         learning_rate = 1
 
         hidden_layer = Layer([
-            SimplePerceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
-            SimplePerceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
+            Perceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
+            Perceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
         ])
 
         output_layer = Layer([
-            SimplePerceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
+            Perceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
         ])
 
-        network = SimpleNetwork(hidden_layer, output_layer)
+        network = NetworkWith1HiddenLayer(hidden_layer, output_layer)
 
         input_samples = [[0, 0], [0, 1], [1, 0], [1, 1]]
         targets = [[0], [1], [1], [0]]

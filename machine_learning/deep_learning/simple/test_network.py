@@ -1,24 +1,24 @@
 import unittest
 
-from educational.simple_perceptron import SimplePerceptron
-from educational.simple_network import Layer, sigmoid, SimpleNetwork, squared_errors
+from simple.perceptron import Perceptron
+from simple.network import Layer, sigmoid, NetworkWith1HiddenLayer, squared_errors
 
 
-class TestSimpleNetwork(unittest.TestCase):
+class TestNetworkWith1HiddenLayer(unittest.TestCase):
     def test(self):
         learning_rate = 0.5
 
         hidden_layer = Layer([
-            SimplePerceptron(learning_rate, [0.15, 0.2], 0.35, activate=sigmoid),
-            SimplePerceptron(learning_rate, [0.25, 0.3], 0.35, activate=sigmoid)
+            Perceptron(learning_rate, [0.15, 0.2], 0.35, activate=sigmoid),
+            Perceptron(learning_rate, [0.25, 0.3], 0.35, activate=sigmoid)
         ])
 
         output_layer = Layer([
-            SimplePerceptron(learning_rate, [0.4, 0.45], 0.6, activate=sigmoid),
-            SimplePerceptron(learning_rate, [0.5, 0.55], 0.6, activate=sigmoid)
+            Perceptron(learning_rate, [0.4, 0.45], 0.6, activate=sigmoid),
+            Perceptron(learning_rate, [0.5, 0.55], 0.6, activate=sigmoid)
         ])
 
-        network = SimpleNetwork(hidden_layer, output_layer)
+        network = NetworkWith1HiddenLayer(hidden_layer, output_layer)
 
         inputs = [0.05, 0.1]
         targets = [0.01, 0.99]

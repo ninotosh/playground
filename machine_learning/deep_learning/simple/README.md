@@ -1,9 +1,9 @@
-`simple_perceptron.py` demonstrates an N input simple perceptron.
+`perceptron.py` demonstrates an N input simple perceptron.
 It was implemented with reference to
 http://natureofcode.com/book/chapter-10-neural-networks/
 
 ```shell
-$ python simple_perceptron.py
+$ python2 perceptron.py
 
 run_1d(0.0336570291962, [0.05926078484651032], 0.964251781182)
 learning_rate: 0.0336570291962, initial_weights: [0.05926078484651032], initial_bias: 0.964251781182
@@ -40,7 +40,7 @@ The example above shows error rates using randomized data sets.
 
 ----
 
-`simple_network.py` demonstrates a neural network with 1 hidden layer using `SimplePerceptron` class in `simple_perceptron.py`.
+`network.py` demonstrates a neural network with 1 hidden layer using `Perceptron` class in `perceptron.py`.
 It may be redundant in that every perceptron has its own learning rate and activation function.
 Code to update biases are commented out because the implementation is based on and tested against
 http://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
@@ -49,6 +49,8 @@ Its `main()` to simulate the logical XOR prints out inputs and outputs after tra
 It gives much better results with the code of bias updates.
 
 ```
+$ PYTHONPATH=.. python3 network.py
+
 [0, 0] => [0.02861174808948324], target: [0]
 [0, 1] => [0.973944082535187], target: [1]
 [1, 0] => [0.9746497850023864], target: [1]
