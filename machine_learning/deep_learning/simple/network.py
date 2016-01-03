@@ -87,34 +87,34 @@ class NetworkWith1HiddenLayer:
             # hl_perceptron.bias -= hl_perceptron.learning_rate * hl_delta
 
 
-if __name__ == "__main__":
+def run_xor():
+    """
+    Simulates XOR.
+    It is better to uncomment the code of updating the biases.
+    """
     from random import uniform, randrange
 
-    def run_xor():
-        """
-        Simulates XOR.
-        It is better to uncomment the code of updating the biases.
-        """
-        learning_rate = 1
+    learning_rate = 1
 
-        hidden_layer = Layer([
-            Perceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
-            Perceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
-        ])
+    hidden_layer = Layer([
+        Perceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
+        Perceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
+    ])
 
-        output_layer = Layer([
-            Perceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
-        ])
+    output_layer = Layer([
+        Perceptron(learning_rate, [uniform(-1, 1), uniform(-1, 1)], uniform(-1, 1), activate=sigmoid),
+    ])
 
-        network = NetworkWith1HiddenLayer(hidden_layer, output_layer)
+    network = NetworkWith1HiddenLayer(hidden_layer, output_layer)
 
-        input_samples = [[0, 0], [0, 1], [1, 0], [1, 1]]
-        targets = [[0], [1], [1], [0]]
-        for _ in range(10000):
-            i = randrange(0, len(input_samples))
-            network.train(input_samples[i], targets[i])
+    input_samples = [[0, 0], [0, 1], [1, 0], [1, 1]]
+    targets = [[0], [1], [1], [0]]
+    for _ in range(10000):
+        i = randrange(0, len(input_samples))
+        network.train(input_samples[i], targets[i])
 
-        for i in range(len(input_samples)):
-            print('{} => {}, target: {}'.format(input_samples[i], network.output(input_samples[i]), targets[i]))
+    for i in range(len(input_samples)):
+        print('{} => {}, target: {}'.format(input_samples[i], network.output(input_samples[i]), targets[i]))
 
+if __name__ == "__main__":
     run_xor()
