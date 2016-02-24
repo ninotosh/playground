@@ -5,7 +5,7 @@ import tensorflow as tf
 
 
 class TestTensorflow(unittest.TestCase):
-    def test_basic(self):
+    def test_type_shape(self):
         x = tf.cast(np.array([[3, 2]]), tf.int32)
         w = tf.Variable([
             [1, 2, 3],
@@ -63,6 +63,25 @@ class TestTensorflow(unittest.TestCase):
             self.assertListEqual(sess.run(c, feed_dict={a: [[3, 1]]}).tolist(), [
                 [3 + 3, 1 + 4]
             ])
+
+    def test_assign(self):
+        x = tf.Variable([1, 2])
+
+        with tf.Session() as sess:
+            sess.run(tf.initialize_all_variables())
+
+            self.assertListEqual(sess.run(x).tolist(), [1, 2])
+
+            assign_op = x.assign([3, 4])
+            self.assertIsInstance(assign_op, tf.Tensor)
+            self.assertFalse(assign_op == x)
+
+            self.assertListEqual(sess.run(x).tolist(), [1, 2])
+            self.assertListEqual(sess.run(assign_op).tolist(), [3, 4])
+            self.assertListEqual(sess.run(x).tolist(), [3, 4])
+
+            self.assertFalse(assign_op == x)
+            self.assertListEqual(sess.run(tf.equal(assign_op, x)).tolist(), [True, True])
 
     def test_summary(self):
         a = tf.placeholder(tf.int32, [1, 2])
