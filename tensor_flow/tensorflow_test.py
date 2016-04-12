@@ -41,7 +41,7 @@ class TestTensorflow(unittest.TestCase):
         add = tf.add(p0, p1)
 
         with tf.Session() as sess:
-            for i in xrange(10):
+            for i in range(10):
                 v0 = sess.run(tf.truncated_normal(p0.get_shape()))
                 v1 = sess.run(tf.truncated_normal(p1.get_shape()))
 
@@ -115,7 +115,7 @@ class TestTensorflow(unittest.TestCase):
             global_step = 0
             feed_dict = [[2, 3]]
             c_serialized = sess.run(merge, feed_dict={a: feed_dict})
-            self.assertIsInstance(c_serialized, str)
+            self.assertIsInstance(c_serialized, bytes)
 
             add_summary = writer.add_summary(c_serialized, global_step=global_step)
             self.assertIsNone(add_summary)

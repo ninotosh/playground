@@ -1,13 +1,9 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import math
 
 import numpy as np
 import tensorflow as tf
 
-from xor.trainingdata import TrainingData
+from tensor_flow.xor.trainingdata import TrainingData
 
 LEARNING_RATE = 0.2
 MAX_EPOCH = 2000

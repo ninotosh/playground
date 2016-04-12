@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import numpy as np
 
 
@@ -9,7 +5,7 @@ class TrainingData(object):
     def __init__(self, inputs, targets):
         self.epoch = 0
         self.index = 0
-        self.data = np.array(zip(inputs, targets))
+        self.data = np.array(list(zip(inputs, targets)))
         np.random.shuffle(self.data)
 
     def next_batch(self, size=None):
