@@ -98,7 +98,7 @@ class TestTensorflow(unittest.TestCase):
         )
 
         with tf.Session() as sess:
-            writer = tf.train.SummaryWriter('/tmp/{}'.format(__name__), graph_def=sess.graph_def)
+            writer = tf.train.SummaryWriter('/tmp/{}'.format(__name__), graph=sess.graph)
             merge = tf.merge_all_summaries()
             self.assertIsNone(merge)
 

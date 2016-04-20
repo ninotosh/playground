@@ -117,7 +117,7 @@ def main(_):
     sess = tf.Session()
     sess.run(init)
 
-    summary_writer = tf.train.SummaryWriter('logdir', graph_def=sess.graph_def)
+    summary_writer = tf.train.SummaryWriter('logdir', graph=sess.graph)
 
     for epoch in range(MAX_EPOCH):
         while True:
