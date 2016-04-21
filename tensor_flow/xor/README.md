@@ -4,12 +4,14 @@ Console output will be something like
 
 ```
 final output of the test input:
-[[  7.74860382e-07]
- [  1.00000024e+00]
- [  9.99999464e-01]
- [ -2.38418579e-07]]
-final loss after training: 5.00932628711e-13
+[ 0.  0.] => [  1.19209290e-07]
+[ 0.  1.] => [ 0.99999976]
+[ 1.  0.] => [ 0.99999964]
+[ 1.  1.] => [  3.57627869e-07]
+final loss after training: 1.6342482922482304e-13
 ```
+
+You can see XOR(0, 0) and XOR(1, 1) are nearly 0, and XOR(0, 1) and XOR(1, 0) are nearly 1.
 
 #### graph
 

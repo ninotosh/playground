@@ -7,7 +7,7 @@ from tensor_flow.xor.trainingdata import TrainingData
 
 LEARNING_RATE = 0.2
 MAX_EPOCH = 2000
-BATCH_SIZE = 1  # invariable for XOR
+BATCH_SIZE = 2
 INPUT_SIZE = 2
 HIDDEN_SIZE = 2
 OUTPUT_SIZE = 1
@@ -140,9 +140,10 @@ def main(_):
 
         training_data.renew_epoch()
 
-    print('final output of the test input:\n{}'.format(
-        sess.run(predicted, feed_dict={x: test_inputs, target: test_targets}))
-    )
+    print('final output of the test input:')
+    for (i, o) in zip(test_inputs, sess.run(predicted, feed_dict={x: test_inputs, target: test_targets})):
+        print('{} => {}'.format(i, o))
+
     print('final loss after training: {}'.format(
         sess.run(loss, feed_dict={x: test_inputs, target: test_targets}))
     )
