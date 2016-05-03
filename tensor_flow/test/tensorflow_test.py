@@ -125,6 +125,44 @@ class TestTensorflow(unittest.TestCase):
             c_serialized = sess.run(merge, feed_dict={a: feed_dict})
             writer.add_summary(c_serialized, global_step=global_step)
 
+    # see test_basic_rnn_cell_graph.png for the graph
+    def test_basic_rnn_cell(self):
+        batch_size = 1
+        input_shape = [batch_size, 2]
+        state_shape = [batch_size, 3]
+        num_units = 4
+
+        input_value = np.random.rand(*input_shape)
+        state = np.random.rand(*state_shape)
+        np_result = self._basic_linear(input_value, state, num_units)
+
+        with tf.variable_scope('test_basic_rnn_cell', initializer=tf.ones):
+            inputs = tf.placeholder(tf.float32, input_shape, 'inputs')
+            old_state = tf.placeholder(tf.float32, state_shape, 'old_state')
+
+            cell = tf.nn.rnn_cell.BasicRNNCell(num_units)
+            output_op, new_state_op = cell(inputs, old_state)
+
+            with tf.Session() as sess:
+                tf.train.SummaryWriter('/tmp/test_basic_rnn_cell', sess.graph)
+                sess.run(tf.initialize_all_variables())
+
+                output, state = sess.run([output_op, new_state_op],
+                                         feed_dict={
+                                             inputs: input_value,
+                                             old_state: state})
+
+                self.assertEqual(output.shape, (batch_size, num_units))
+                np.testing.assert_array_almost_equal(np_result, output)
+
+    @staticmethod
+    def _basic_linear(input_value, state, num_units):
+        concatenated = np.concatenate((input_value, state), axis=1)
+        w_shape = [concatenated.shape[1], num_units]
+        w = np.ones(w_shape)
+        output = np.tanh(concatenated.dot(w))
+        return output
+
 
 if __name__ == '__main__':
     unittest.main()
