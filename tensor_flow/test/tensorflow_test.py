@@ -153,6 +153,7 @@ class TestTensorflow(unittest.TestCase):
                                              old_state: state})
 
                 self.assertEqual(output.shape, (batch_size, num_units))
+                self.assertTrue(np.array_equal(output, state))
                 np.testing.assert_array_almost_equal(np_result, output)
 
     @staticmethod
@@ -162,6 +163,29 @@ class TestTensorflow(unittest.TestCase):
         w = np.ones(w_shape)
         output = np.tanh(concatenated.dot(w))
         return output
+
+    def test_fully_connected(self):
+        input_size = 3
+        layer_size = 2
+        inputs = [[.1, .2, .3], [.4, .5, .6]]  # batch size (=2) * input_size
+        activation_fn = tf.sigmoid
+        weight_init = tf.ones
+        bias_init = tf.ones
+
+        w = weight_init([input_size, layer_size])
+        b = bias_init([layer_size])  # equivalent to [1, layer_size]
+
+        x = tf.placeholder(tf.float32, [None, input_size])
+        infer = tf.contrib.layers.fully_connected(x, layer_size,
+                                                  activation_fn=activation_fn,
+                                                  weight_init=weight_init,
+                                                  bias_init=bias_init)
+        with tf.Session() as sess:
+            sess.run(tf.initialize_all_variables())
+            output = sess.run(infer, feed_dict={x: inputs})
+            expect = sess.run(activation_fn(tf.matmul(inputs, w) + b))
+
+            self.assertTrue(np.array_equal(output, expect))
 
 
 if __name__ == '__main__':
