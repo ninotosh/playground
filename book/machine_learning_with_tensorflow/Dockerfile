@@ -1,7 +1,8 @@
 FROM tensorflow/tensorflow
 
-RUN groupadd tfgroup \
-    && useradd -g tfgroup --create-home --shell /bin/bash tfuser
+RUN pip install yahoo-finance &&\
+    groupadd tfgroup &&\
+    useradd -g tfgroup --create-home --shell /bin/bash tfuser
 
 WORKDIR "/home/tfuser"
 
