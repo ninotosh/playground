@@ -13,7 +13,7 @@ class TestTensorflow(unittest.TestCase):
         ])
         b = tf.Variable([[5, 6, 7]])
         z = tf.matmul(x, w) + b
-        init = tf.initialize_all_variables()
+        init = tf.global_variables_initializer()
 
         self.assertIsInstance(x, tf.Tensor)
         self.assertNotIsInstance(w, tf.Tensor)
@@ -68,7 +68,7 @@ class TestTensorflow(unittest.TestCase):
         x = tf.Variable([1, 2])
 
         with tf.Session() as sess:
-            sess.run(tf.initialize_all_variables())
+            sess.run(tf.global_variables_initializer())
 
             self.assertListEqual(sess.run(x).tolist(), [1, 2])
 
@@ -98,16 +98,16 @@ class TestTensorflow(unittest.TestCase):
         )
 
         with tf.Session() as sess:
-            writer = tf.train.SummaryWriter('/tmp/{}'.format(__name__), graph=sess.graph)
-            merge = tf.merge_all_summaries()
+            writer = tf.summary.FileWriter('/tmp/{}'.format(__name__), graph=sess.graph)
+            merge = tf.summary.merge_all()
             self.assertIsNone(merge)
 
-            scalar_summary = tf.scalar_summary([['c']], c)
+            scalar_summary = tf.summary.scalar('c', tf.reshape(c, []))  # reshape [[x]] to x
             self.assertIsInstance(scalar_summary, tf.Tensor)
             self.assertEqual(scalar_summary.dtype, tf.string)
             self.assertListEqual(scalar_summary.get_shape().as_list(), [])
 
-            merge = tf.merge_summary([scalar_summary])
+            merge = tf.summary.merge([scalar_summary])
             self.assertIsInstance(merge, tf.Tensor)
             self.assertEqual(merge.dtype, tf.string)
             self.assertListEqual(merge.get_shape().as_list(), [])
@@ -136,16 +136,16 @@ class TestTensorflow(unittest.TestCase):
         state = np.random.rand(*state_shape)
         np_result = self._basic_linear(input_value, state, num_units)
 
-        with tf.variable_scope('test_basic_rnn_cell', initializer=tf.ones):
+        with tf.variable_scope('test_basic_rnn_cell', initializer=tf.ones_initializer()):
             inputs = tf.placeholder(tf.float32, input_shape, 'inputs')
             old_state = tf.placeholder(tf.float32, state_shape, 'old_state')
 
-            cell = tf.nn.rnn_cell.BasicRNNCell(num_units)
+            cell = tf.contrib.rnn.BasicRNNCell(num_units)
             output_op, new_state_op = cell(inputs, old_state)
 
             with tf.Session() as sess:
-                tf.train.SummaryWriter('/tmp/test_basic_rnn_cell', sess.graph)
-                sess.run(tf.initialize_all_variables())
+                tf.summary.FileWriter('/tmp/test_basic_rnn_cell', sess.graph)
+                sess.run(tf.global_variables_initializer())
 
                 output, state = sess.run([output_op, new_state_op],
                                          feed_dict={
@@ -169,8 +169,8 @@ class TestTensorflow(unittest.TestCase):
         layer_size = 2
         inputs = [[.1, .2, .3], [.4, .5, .6]]  # batch size (=2) * input_size
         activation_fn = tf.sigmoid
-        weight_init = tf.ones
-        bias_init = tf.ones
+        weight_init = tf.ones_initializer()
+        bias_init = tf.ones_initializer()
 
         w = weight_init([input_size, layer_size])
         b = bias_init([layer_size])  # equivalent to [1, layer_size]
@@ -178,10 +178,10 @@ class TestTensorflow(unittest.TestCase):
         x = tf.placeholder(tf.float32, [None, input_size])
         infer = tf.contrib.layers.fully_connected(x, layer_size,
                                                   activation_fn=activation_fn,
-                                                  weight_init=weight_init,
-                                                  bias_init=bias_init)
+                                                  weights_initializer=weight_init,
+                                                  biases_initializer=bias_init)
         with tf.Session() as sess:
-            sess.run(tf.initialize_all_variables())
+            sess.run(tf.global_variables_initializer())
             output = sess.run(infer, feed_dict={x: inputs})
             expect = sess.run(activation_fn(tf.matmul(inputs, w) + b))
 
