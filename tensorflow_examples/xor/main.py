@@ -3,7 +3,7 @@ import math
 import numpy as np
 import tensorflow as tf
 
-from tensor_flow.xor.trainingdata import TrainingData
+from xor.trainingdata import TrainingData
 
 LEARNING_RATE = 0.2
 MAX_EPOCH = 2000
@@ -16,13 +16,13 @@ OUTPUT_SIZE = 1
 def sigmoid(x, input_size, size):
     initializer = tf.truncated_normal_initializer(stddev=1.0/math.sqrt(input_size))
     weights = tf.get_variable('weights', [input_size, size], initializer=initializer)
-    bias = tf.get_variable('bias', [size], initializer=tf.zeros)
+    bias = tf.get_variable('bias', [size], initializer=tf.zeros_initializer)
     return tf.nn.sigmoid(tf.add(tf.matmul(x, weights), bias), name='z')
 
 
 def linear(x, input_size, size):
-    weights = tf.get_variable('weights', [input_size, size], initializer=tf.ones)
-    bias = tf.get_variable('bias', [size], initializer=tf.zeros)
+    weights = tf.get_variable('weights', [input_size, size], initializer=tf.ones_initializer)
+    bias = tf.get_variable('bias', [size], initializer=tf.zeros_initializer)
     return tf.add(tf.matmul(x, weights), bias, name='z')
 
 
@@ -69,12 +69,17 @@ def summarize_step(loss):
             o_b = tf.get_variable('bias', [OUTPUT_SIZE])
 
     with tf.name_scope('summarize_step'):
-        return tf.merge_summary([
-            tf.scalar_summary('loss', loss),
-            tf.scalar_summary([['h_w_00', 'h_w_01'], ['h_w_10', 'h_w_11']], h_w),
-            tf.scalar_summary(['h_b_0', 'h_b_1'], h_b),
-            tf.scalar_summary([['o_w_0'], ['o_w_1']], o_w),
-            tf.scalar_summary(['o_b_0'], o_b)
+        return tf.summary.merge([
+            tf.summary.scalar('loss', loss),
+            tf.summary.scalar('h-w-0-0', h_w[0][0]),
+            tf.summary.scalar('h-w-0-1', h_w[0][1]),
+            tf.summary.scalar('h-w-1-0', h_w[1][0]),
+            tf.summary.scalar('h-w-1-1', h_w[1][1]),
+            tf.summary.scalar('h-b-0', h_b[0]),
+            tf.summary.scalar('h-b-1', h_b[1]),
+            tf.summary.scalar('o-w-0-0', o_w[0][0]),
+            tf.summary.scalar('o-w-1-0', o_w[1][0]),
+            tf.summary.scalar('o_b', o_b[0])
         ])
 
 
@@ -82,9 +87,10 @@ def summarize_epoch(test_outputs, test_targets):
     with tf.name_scope('summarize_epoch'):
         mean_error = evaluate(test_outputs, test_targets)
 
-        return tf.merge_summary([
-            tf.scalar_summary('mean diff to target', mean_error),
-            tf.scalar_summary([['output_[0,0]'], ['output_[0,1]'], ['output_[1,0]'], ['output_[1,1]']], test_outputs)
+        return tf.summary.merge([
+            tf.summary.scalar('mean diff to target', mean_error),
+            tf.summary.scalar('output-0-0', test_outputs[0][0]),
+            tf.summary.scalar('output-1-0', test_outputs[1][0])
         ])
 
 
@@ -113,11 +119,11 @@ def main(_):
 
         merge_epoch = summarize_epoch(test_outputs, test_targets)
 
-    init = tf.initialize_all_variables()
+    init = tf.global_variables_initializer()
     sess = tf.Session()
     sess.run(init)
 
-    summary_writer = tf.train.SummaryWriter('logdir', graph=sess.graph)
+    summary_writer = tf.summary.FileWriter('logdir', graph=sess.graph)
 
     for epoch in range(MAX_EPOCH):
         while True:

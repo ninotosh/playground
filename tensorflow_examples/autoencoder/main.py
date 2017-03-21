@@ -2,7 +2,7 @@ import itertools
 
 import tensorflow as tf
 
-from tensor_flow.autoencoder.trainingdata import TrainingData
+from autoencoder.trainingdata import TrainingData
 
 
 def main(_):
@@ -27,7 +27,7 @@ def main(_):
     training_data = TrainingData(input_size, batch_size=batch_size)
 
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.global_variables_initializer())
 
         for epoch in range(epochs):
             for inputs in training_data:
@@ -35,6 +35,7 @@ def main(_):
 
             training_data.renew_epoch()
 
+        print('input: encoded, decoded')
         for test_input in itertools.product([0, 1], repeat=input_size):
             print('{}: {}, {}'.format(
                 test_input,
