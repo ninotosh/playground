@@ -1,6 +1,6 @@
 import unittest
 
-from tensor_flow.autoencoder.trainingdata import TrainingData
+from autoencoder.trainingdata import TrainingData
 
 
 class Test(unittest.TestCase):
