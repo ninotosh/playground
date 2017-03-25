@@ -148,6 +148,31 @@ class TestBasic(unittest.TestCase):
 
             self.assertTrue(np.array_equal(output, expect))
 
+    def test_embedding_lookup(self):
+        vocabulary_size = 3
+        embedding_size = 1
+        embedding_matrix = tf.constant(
+            [[0.3], [0.2], [0.6]],
+            shape=[vocabulary_size, embedding_size]
+        )
+        embeddings = tf.nn.embedding_lookup(
+            embedding_matrix,
+            [2, 1, 0, 1, 2]
+        )
+
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            np.testing.assert_array_almost_equal(
+                sess.run(embeddings).tolist(),
+                [
+                    [0.6],  # embedding_matrix[2]
+                    [0.2],  # embedding_matrix[1]
+                    [0.3],  # embedding_matrix[0]
+                    [0.2],  # embedding_matrix[1]
+                    [0.6]   # embedding_matrix[2]
+                ]
+            )
+
 
 if __name__ == '__main__':
     unittest.main()
