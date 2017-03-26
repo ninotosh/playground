@@ -6,7 +6,10 @@ import tensorflow as tf
 
 def assert_version(target_version):
     target_major, target_minor, target_patch = map(int, target_version.split('.'))
-    major, minor, patch = map(int, tf.__version__.split('.'))
+    tf_version = tf.__version__
+    if '-' in tf_version:
+        tf_version = tf_version[:tf_version.find('-')]
+    major, minor, patch = map(int, tf_version.split('.'))
     assert major >= target_major
     if major == target_major:
         assert minor >= target_minor

@@ -99,8 +99,6 @@ class TestBasic(unittest.TestCase):
 
         with tf.Session() as sess:
             writer = tf.summary.FileWriter('/tmp/{}'.format(__name__), graph=sess.graph)
-            merge = tf.summary.merge_all()
-            self.assertIsNone(merge)
 
             scalar_summary = tf.summary.scalar('c', tf.reshape(c, []))  # reshape [[x]] to x
             self.assertIsInstance(scalar_summary, tf.Tensor)
@@ -169,7 +167,103 @@ class TestBasic(unittest.TestCase):
                     [0.2],  # embedding_matrix[1]
                     [0.3],  # embedding_matrix[0]
                     [0.2],  # embedding_matrix[1]
-                    [0.6]   # embedding_matrix[2]
+                    [0.6],  # embedding_matrix[2]
+                ]
+            )
+
+    def test_slice_input_producer(self):
+        data_size = 4
+        feature_size = 3
+        input_data = [
+            [0, 0, 0],
+            [2, 2, 2],
+            [4, 4, 4],
+            [6, 6, 6],
+        ]
+        label_data = [
+            [1, 1, 1],
+            [3, 3, 3],
+            [5, 5, 5],
+            [7, 7, 7],
+        ]
+        assert np.array(input_data).shape, (data_size, feature_size)
+        assert np.array(input_data).shape, np.array(label_data).shape
+
+        epochs = 3
+        batch_size = 2
+        training_data = tf.train.slice_input_producer(
+            [input_data, label_data],
+            num_epochs=epochs
+        )
+        batch = tf.train.batch(training_data, batch_size)
+
+        with tf.Session() as sess:
+            sess.run(tf.group(
+                tf.global_variables_initializer(),
+                tf.local_variables_initializer()
+            ))
+
+            coord = tf.train.Coordinator()
+            threads = tf.train.start_queue_runners(sess=sess, coord=coord)
+            step = 0
+            try:
+                while not coord.should_stop():
+                    inputs, labels = sess.run(batch)
+                    self.assertEqual(inputs.shape, (batch_size, feature_size))
+                    self.assertEqual(inputs.shape, labels.shape)
+
+                    # e.g.
+                    # inputs == [[6 6 6] [2 2 2]]
+                    # labels == [[7 7 7] [3 3 3]]
+                    self.assertTrue(np.array_equal(
+                        labels - inputs,
+                        np.ones(inputs.shape, dtype=np.int)
+                    ))
+
+                    step += 1
+            except tf.errors.OutOfRangeError:
+                self.assertEqual(step, data_size / batch_size * epochs)
+            finally:
+                coord.request_stop()
+
+            coord.join(threads)
+
+    def test_reduce_sum(self):
+        batch = tf.constant([
+            [
+                [0, 1, 2],
+                [5, 4, 3]
+            ],
+            [
+                [6, 8, 7],
+                [9, 2, 5]
+            ],
+        ])
+
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            first = tf.reduce_sum(batch, axis=2)
+            second = tf.reduce_sum(first, axis=1)
+            self.assertEqual(
+                sess.run(first).tolist(),
+                [
+                    [
+                        0 + 1 + 2,  # 3
+                        5 + 4 + 3  # 12
+                    ],
+                    [
+                        6 + 8 + 7,  # 21
+                        9 + 2 + 5  # 16
+                    ]
+                ]
+            )
+            self.assertEqual(
+                sess.run(second).tolist(),
+                [
+                    3 +
+                    12,
+                    21 +
+                    16
                 ]
             )
 
