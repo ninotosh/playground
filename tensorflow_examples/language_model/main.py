@@ -55,9 +55,6 @@ class Evaluator:
         for i in range(actual_batch_size):
             if Evaluator.sequence_accurate(ideal_result[i], predicted_result[i]):
                 correct_count += 1
-            # end_index = ideal_result[i].index(0) + 1
-            # if ideal_result[i][:end_index] == predicted_result[i][:end_index]:
-            #     correct_count += 1
 
         return float(correct_count) / actual_batch_size
 
