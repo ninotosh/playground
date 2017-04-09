@@ -20,6 +20,7 @@ INPUT_DATA = [
         [0, 0, 0, 0, 0, 0],  # no input
     ]
 ]
+
 # this is INPUT_DATA shifted by 1
 LABEL_DATA = [
     INPUT_DATA[0][1:] + [[0] * len(INPUT_DATA[0][0])],
@@ -49,7 +50,8 @@ class Evaluator:
         :type predictions: np.ndarray|list|Iterable
         """
         ideal_result = list(labels.tolist()) if isinstance(labels, np.ndarray) else labels
-        predicted_result = list(predictions.tolist()) if isinstance(predictions, np.ndarray) else predictions
+        predicted_result = list(predictions.tolist()) \
+            if isinstance(predictions, np.ndarray) else predictions
         actual_batch_size = len(ideal_result)
         correct_count = 0
         for i in range(actual_batch_size):
@@ -73,7 +75,9 @@ class Evaluator:
 
 def main(_):
     epochs = 200
+    # length of any INPUT_DATA[i]
     last_time_step = len(INPUT_DATA[0])
+    # length of any INPUT_DATA[i][j]
     vocabulary_size = len(INPUT_DATA[0][0])
     # these sizes should be equal because of no projection layers
     # between the RNN layer and the softmax layer
@@ -98,17 +102,18 @@ def main(_):
     ]
 
     time_steps = tf.reduce_sum(tf.reduce_sum(inputs, axis=2), axis=1)
-    ideal = tf.arg_max(labels, 2)
+    ideal = tf.arg_max(labels, dimension=2)
 
     cell = tf.contrib.rnn.BasicRNNCell(cell_size)
-    with tf.variable_scope('my_rnn'):  # cell.__call__() creates vars
+    rnn_scope = 'my_rnn'
+    with tf.variable_scope(rnn_scope):  # cell.__call__() creates vars
         logits, final_state = tf.nn.dynamic_rnn(
             cell,
             inputs,
             sequence_length=time_steps,
             dtype=tf.float32,
         )
-    prediction = tf.arg_max(logits, 2)
+    prediction = tf.arg_max(logits, dimension=2)
 
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
         labels=labels,
@@ -165,17 +170,20 @@ def main(_):
         for sequence in INPUT_DATA:
             first_word = tf.constant([sequence[0]], tf.float32)
             # generate output from the 1st word
-            inferred.append(sess.run(tf.arg_max(infer(cell, vocabulary_size, first_word), 1)).tolist())
+            inferred.append(sess.run(tf.arg_max(
+                infer(cell, rnn_scope, vocabulary_size, first_word),
+                dimension=1
+            )).tolist())
 
         print('inference accuracy: {}'.format(
-            Evaluator.batch_accuracy(np.argmax(LABEL_DATA, 2), inferred)
+            Evaluator.batch_accuracy(np.argmax(LABEL_DATA, axis=2), inferred)
         ))
 
 
-def infer(cell, vocabulary_size, first_one_hot):
-    assert first_one_hot.shape.as_list() == [1, 6]
+def infer(cell, scope, vocabulary_size, first_one_hot):
+    assert first_one_hot.shape.as_list() == [1, vocabulary_size]
 
-    with tf.variable_scope('my_rnn/rnn', reuse=True):
+    with tf.variable_scope('{}/rnn'.format(scope), reuse=True):
         def cond(output_one_hot, _, all_outputs):
             # limit the number of output length to avoid infinite generation
             less = tf.less(all_outputs.size(), 10)
@@ -183,7 +191,7 @@ def infer(cell, vocabulary_size, first_one_hot):
                 output_one_hot,
                 tf.one_hot([[0]], vocabulary_size)  # <eos>
             ))
-            return tf.reduce_all([less, is_regular_word])
+            return tf.logical_and(less, is_regular_word)
 
         def body(input_one_hot, state, all_outputs):
             output, new_state = cell(input_one_hot, state)
@@ -200,9 +208,9 @@ def infer(cell, vocabulary_size, first_one_hot):
         _, _, inferred = tf.while_loop(
             cond,
             body,
-            (
+            loop_vars=(
                 first_one_hot,
-                cell.zero_state(1, tf.float32),
+                cell.zero_state(batch_size=1, dtype=tf.float32),
                 tf.TensorArray(tf.float32, size=0, dynamic_size=True),
             ),
         )
