@@ -267,6 +267,52 @@ class TestBasic(unittest.TestCase):
                 ]
             )
 
+    def test_slice(self):
+        x = tf.constant([
+            [
+                [0, 1, 2],
+                [5, 4, 3]
+            ],
+            [
+                [6, 8, 7],
+                [9, 2, 5]
+            ],
+        ])
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            self.assertEqual(
+                sess.run(tf.slice(x, begin=[0, 1, 0], size=[2, 1, 3])).tolist(),
+                [
+                    [
+                        [5, 4, 3]
+                    ],
+                    [
+                        [9, 2, 5]
+                    ]
+                ]
+            )
+
+    def test_reshape(self):
+        x = tf.constant(
+            [
+                [
+                    [5, 4, 3]
+                ],
+                [
+                    [9, 2, 5]
+                ]
+            ]
+        )
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            self.assertEqual(
+                sess.run(tf.reshape(x, shape=[2, 3])).tolist(),
+                [
+                    [5, 4, 3],
+                    [9, 2, 5]
+                ]
+            )
+
 
 if __name__ == '__main__':
     unittest.main()
