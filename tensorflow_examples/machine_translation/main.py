@@ -7,22 +7,9 @@ import tensorflow as tf
 VOCABULARY_SIZE = 6
 
 
-class Summary:
-    def __init__(self, sess, logdir='logdir'):
-        self.sess = sess
-        self.writer = tf.summary.FileWriter(logdir, graph=sess.graph)
-        tf.summary.merge_all()
-
-    def write(self, scalar, name, global_step=None):
-        with tf.name_scope('summaries'):
-            summary = tf.summary.merge([tf.summary.scalar(name, scalar)])
-            self.writer.add_summary(self.sess.run(summary), global_step)
-            tf.summary.merge_all()
-
-
 def translate(sentence: Iterable) -> np.ndarray:
-    # TODO
-    return VOCABULARY_SIZE - np.array([n for n in sentence])
+    # simple version for debugging
+    # return VOCABULARY_SIZE - np.array([n for n in sentence])
     s = []
     for n in sentence:
         if n % 10 == 0:
@@ -71,7 +58,7 @@ def one_hot(sequences: Iterable) -> List:
 
 def create_training_data(training_data_size: int) -> Tuple:
     min_sentence_len = 3
-    max_sentence_len = 5
+    max_sentence_len = 15
 
     sources = []
     targets = []
@@ -91,9 +78,9 @@ def create_training_data(training_data_size: int) -> Tuple:
 
 def main(_):
     epochs = 10
-    training_data_size = 2
+    training_data_size = 10
     cell_size = VOCABULARY_SIZE
-    batch_size = 1
+    batch_size = 2
     allow_smaller_final_batch = True
 
     assert batch_size <= training_data_size
@@ -111,17 +98,16 @@ def main(_):
 
     assert inputs.shape.as_list() == [
         None if allow_smaller_final_batch else batch_size,
-        np.array(input_data).shape[1],  # max len of input sequence
+        np.array(input_data).shape[1],  # max len of input sequences
         VOCABULARY_SIZE
     ]
     assert labels.shape.as_list() == [
         None if allow_smaller_final_batch else batch_size,
-        np.array(label_data).shape[1],  # max len of label sequence
+        np.array(label_data).shape[1],  # max len of label sequences
         VOCABULARY_SIZE
     ]
 
     time_steps = tf.reduce_sum(tf.reduce_sum(inputs, axis=2), axis=1)
-    ideal = tf.arg_max(labels, dimension=2)
 
     cell = tf.contrib.rnn.BasicLSTMCell(cell_size)
     with tf.variable_scope('encoder'):  # cell.__call__() creates vars
@@ -137,7 +123,7 @@ def main(_):
             dtype=tf.float32,
         )
     loss = decode_for_training(final_state_tuple.c, labels)
-    prediction = tf.arg_max(logits, dimension=2)
+    perplexity = tf.reduce_mean(tf.exp(loss))
 
     global_step = tf.get_variable(
         'global_step',
@@ -145,20 +131,24 @@ def main(_):
         initializer=tf.constant_initializer(0),
         trainable=False
     )
-    # optimizer = tf.train.AdamOptimizer(learning_rate=0.05)
+    # optimizer = tf.train.AdamOptimizer(learning_rate=0.1)
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.1)
     # optimizer = tf.train.MomentumOptimizer(learning_rate=0.1, momentum=0.1)
     train = optimizer.minimize(tf.reduce_sum(loss, axis=0), global_step=global_step)
+
+    summary = tf.summary.merge([
+        tf.summary.scalar('mean_perplexity', perplexity)
+    ])
 
     fetches = {
         'inputs': inputs,
         'labels': labels,
         'time_steps': time_steps,
-        'ideal': ideal,
         'logits': logits,
-        'prediction': prediction,
         'loss': loss,
+        'perplexity': perplexity,
         'train': train,
+        'summary': summary
     }
 
     with tf.Session() as sess:
@@ -168,19 +158,18 @@ def main(_):
             tf.local_variables_initializer()
         ))
 
-        summary = Summary(sess)
+        writer = tf.summary.FileWriter('logdir', graph=sess.graph)
 
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
         try:
             while not coord.should_stop():
                 result = sess.run(fetches=fetches)
-                summary.write(tf.reduce_mean(loss), 'mean loss', tf.train.global_step(sess, global_step))
-                print(result['loss'], 'loss')
-                # print(result['sum'], 'sum')
-                # print(np.exp(result['sum']), 'perplexity')
+                step = tf.train.global_step(sess, global_step)
+                writer.add_summary(result['summary'], step)
+                print('{}: {}'.format(step, result['perplexity']))
         except tf.errors.OutOfRangeError:
-            print('batch stopped')
+            print('batch ended')
         finally:
             coord.request_stop()
 
@@ -203,12 +192,10 @@ def decode_for_training(final_enc_state, labels):
 
     # tf.shape(labels): tuple of 1 element
     batch_size = tf.shape(labels)[0]  # type: tf.Tensor of rank 0
-    # labels = tf.concat([tf.reshape(context, [batch_size, 1, cell_size]), labels], axis=1)
 
     cell = tf.contrib.rnn.BasicLSTMCell(cell_size)
     with tf.variable_scope('decoder'):
-        def cond(loop_cnt, output_one_hot, _, __):
-            # output_one_hot = tf.Print(output_one_hot, [output_one_hot, tf.zeros_like(output_one_hot)], 'XXX', -1, 100)
+        def cond(_, output_one_hot, __, ___):
             # limit the number of output length to avoid infinite generation
             is_regular_word = tf.reduce_any(tf.not_equal(
                 output_one_hot,
@@ -242,7 +229,7 @@ def decode_for_training(final_enc_state, labels):
                 losses.write(loop_cnt, loss)
             )
 
-        _, _, _, losses = tf.while_loop(
+        _, _, _, result_loss = tf.while_loop(
             cond,
             body,
             loop_vars=(
@@ -253,7 +240,7 @@ def decode_for_training(final_enc_state, labels):
             ),
         )
 
-        return losses.stack()
+        return result_loss.stack()
 
 
 if __name__ == '__main__':
