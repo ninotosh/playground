@@ -184,16 +184,19 @@ def infer(cell, scope, vocabulary_size, first_one_hot):
     assert first_one_hot.shape.as_list() == [1, vocabulary_size]
 
     with tf.variable_scope('{}/rnn'.format(scope), reuse=True):
-        def cond(output_one_hot, _, all_outputs):
+        def cond(output_one_hot, _, results):
             # limit the number of output length to avoid infinite generation
-            less = tf.less(all_outputs.size(), 10)
-            is_regular_word = tf.reduce_any(tf.not_equal(
-                output_one_hot,
-                tf.one_hot([[0]], vocabulary_size)  # <eos>
-            ))
+            less = tf.less(results.size(), 10)
+            # output_one_hot is a regular word if any element is unequal to <eos>
+            is_regular_word = tf.reduce_any(
+                tf.not_equal(
+                    output_one_hot,
+                    tf.one_hot([[0]], vocabulary_size)  # <eos>
+                )
+            )
             return tf.logical_and(less, is_regular_word)
 
-        def body(input_one_hot, state, all_outputs):
+        def body(input_one_hot, state, results):
             output, new_state = cell(input_one_hot, state)
             output_one_hot = tf.one_hot(
                 tf.arg_max(output, dimension=1),
@@ -202,7 +205,7 @@ def infer(cell, scope, vocabulary_size, first_one_hot):
             return (
                 output_one_hot,
                 new_state,
-                all_outputs.write(all_outputs.size(), output_one_hot)
+                results.write(results.size(), output_one_hot)
             )
 
         _, _, inferred = tf.while_loop(
@@ -216,11 +219,6 @@ def infer(cell, scope, vocabulary_size, first_one_hot):
         )
 
         return tf.reshape(inferred.stack(), [inferred.size(), vocabulary_size])
-        # return this to include the first word
-        # tf.concat([
-        #     first_one_hot,
-        #     tf.reshape(inferred.stack(), [inferred.size(), vocabulary_size])
-        # ], axis=0)
 
 
 if __name__ == '__main__':
