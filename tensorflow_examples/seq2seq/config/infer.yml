@@ -1,0 +1,15 @@
+model_dir: data/output
+tasks:
+  - class:  # add /path/to/seq2seq/src to PYTHONPATH
+      tasks.decode_text.DecodeText
+    params:
+      unk_replace: True
+      postproc_fn: seq2seq.data.postproc.strip_bpe
+  - class: DumpAttention
+    params:
+      output_dir: data/attention
+input_pipeline:
+  class: ParallelTextInputPipeline
+  params:
+    source_files:
+      - data/input/test/sources.txt

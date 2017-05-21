@@ -1,0 +1,24 @@
+hooks:
+  - class: PrintModelAnalysisHook
+  - class: TrainSampleHook
+    params:
+      every_n_steps: 50
+model_params:
+  vocab_source: data/input/train/sources_vocab.txt
+  vocab_target: data/input/train/targets_vocab.txt
+input_pipeline_train:
+  class: ParallelTextInputPipeline
+  params:
+    source_files:
+      - data/input/train/sources.txt
+    target_files:
+      - data/input/train/targets.txt
+input_pipeline_dev:
+  class: ParallelTextInputPipeline
+  params:
+    source_files:
+      - data/input/train/sources.txt
+    target_files:
+      - data/input/train/targets.txt
+output_dir: data/output
+train_steps: 150
