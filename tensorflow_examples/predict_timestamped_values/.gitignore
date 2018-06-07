@@ -1,0 +1,5 @@
+.ipynb_checkpoints/
+model_dir/
+dummy_prediction.csv
+dummy_training.csv
+dummy_validation.csv
